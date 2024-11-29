@@ -495,7 +495,7 @@
         // If the session duration exceeds 24 hours
         alert('Your session has expired. Please log in again.');
         sessionStorage.removeItem('sessionStart'); // Clear session start time
-        window.location.href = '/login.html'; // Redirect to login
+        window.location.href = 'login.html'; // Redirect to login
       } else {
         // Session is still valid, you can proceed with the session
         console.log('Session is still valid');
