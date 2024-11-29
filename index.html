@@ -280,7 +280,7 @@
           <span class="material-icons">logout</span>
         </button>
       </div>
-      <img id="bankImage" src="/images/scb.png"/>
+      <img id="bankImage" src="../images/scb.png"/>
       <span style="width: 10px;"></span> 
       <h1 id="bank">Enter Number</h1>
       <span style="width: 100px;"></span> 
@@ -451,7 +451,7 @@
     // Handle logout button click
     document.getElementById('logoutButton').addEventListener('click', function() {
       sessionStorage.clear();
-      window.location.href = '/login.html';
+      window.location.href = '../login.html';
       /*
       // Make an API request to logout
       fetch('/logout', {
@@ -486,7 +486,7 @@
 
       try {
         // Fetch user data from user.json
-        const response = await fetch('/public/user.json'); // Adjust path if necessary
+        const response = await fetch('../public/user.json'); // Adjust path if necessary
         const users = await response.json();
         console.log(users);
         // Find the current user in the user data
@@ -552,7 +552,7 @@
 
     function redirectToLogin() {
       sessionStorage.clear();  // Clear session data for security
-      window.location.href = '/login.html';  // Redirect to login page
+      window.location.href = '../login.html';  // Redirect to login page
     }
 
 
