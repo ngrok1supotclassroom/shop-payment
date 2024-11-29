@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate QR Code</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="icon" href="/images/favicon.png" type="image/png"></link>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      margin-top: 10px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 0px;
+      font-weight: 900;
+    }
+
+    .qr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 300px;
+      height: 300px;
+      margin-top: 20px;
+    }
+
+    .qr img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* Adjust for spacing */
+      margin-bottom: 20px; /* Add space below header */
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #555;
+    }
+
+    .back-button:hover {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <button class="back-button" onclick="window.location.href = 'index.html';">
+        <span class="material-icons" style="font-size: 36px;">home</span>
+      </button>
+      <span style="width: 24px;"></span> 
+      <h1 id="bank">Bank</h1>
+      <span style="width: 24px;"></span> 
+      <img id="bankImage" src="/images/scb.png" style="width: 75px;height: 75px;"/>
+    </div>
+    <div id="number" style="font-size: 64px; font-weight:900; color: red;">Amount</div>
+    <div class="qr" id="qrcode"></div> <!-- QR Code will be displayed here -->
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    //document.getElementById('qrForm').addEventListener('submit', function(e) {
+    //  e.preventDefault();
+      const savedBank = localStorage.getItem('bank') || 'SCB';
+      document.getElementById("bank").innerHTML = savedBank;
+      const number = localStorage.getItem('amount'); // document.getElementById('number').value;
+      const shopCode = localStorage.getItem(`${savedBank}_shopCode`);
+      const billerId = localStorage.getItem(`${savedBank}_billerId`);
+      const reference = localStorage.getItem(`${savedBank}_ref`);
+      document.getElementById('number').innerHTML = number;
+      //if (!number || !shopCode || !billerId || !reference) {
+      //  alert("Missing input values. Please set up your shop details in the settings.");
+      //  return;
+      //}
+
+      let promptpayData;
+      if(savedBank == 'SCB') {
+        // Generate SCB data string
+        promptpayData = generateSCBData(number, shopCode, billerId, reference);
+      } else if(savedBank == 'KBANK') {
+        promptpayData = generateKShopData(number, shopCode, billerId, reference)
+      } else if(savedBank == 'PromptPay') {
+        promptpayData = generatePromptPayData(number, shopCode, billerId, reference);
+      }
+
+      // Clear any existing QR Code
+      document.getElementById('qrcode').innerHTML = "";
+      
+      // Generate QR Code
+      new QRCode(document.getElementById('qrcode'), {
+        text: promptpayData,
+        width: 300,
+        height: 300,
+        correctLevel: QRCode.CorrectLevel.L,
+        version: 10
+      });
+    //});
+
+    // Function to generate SCB QR Code data (based on your server logic)
+    function generateSCBData(amount, shopCode, billerId, refNo) {
+      const fix1 = '00020101021230650016A0000006770101120115';
+      const fix2 = '0215';
+      const fix3 = '0303SCB5802TH54';
+      const fix4 = '530376462200716';
+
+      // Format the amount with 2 decimals
+      const amountFormatted = parseFloat(amount).toFixed(2);
+      const amountTag = `${amountFormatted.padStart(6, '0')}`;
+      const amountTagLength = String(amountTag.length).padStart(2, '0');
+
+      // Concatenate data fields
+      let qrData = fix1 + billerId + fix2 + shopCode + fix3 + amountTagLength + amountTag + fix4 + refNo + "6304";
+      
+      // Calculate CRC
+      const crcValue = calculateCRC(qrData).toString(16).toUpperCase().padStart(4, '0');
+      return qrData + crcValue;
+    }
+
+    // Function to generate PromptPay data with CRC
+    function generateKShopData(amount, _shopCode, _billerId) {
+      //Example 
+      const fix1 = '00020101021130810016A0000006770101120115';
+      const billerId = _billerId; //'010753600031508';
+      const fix2 = '0214';
+      const shopCode = _shopCode; //'BEV01000154916';
+      const fix3 = '0320KPS004';
+      // shopCode
+      const fix4 = '31690016A00000067701011301030040214';
+      // shopCode
+      const fix5 = '0420KPS004';
+      // shopCode
+      const fix6 = '530376454';
+      // amountTagLength + amountTag
+      const fix7 = '5802TH6304';
+      // CRC
+
+      // Format the amount correctly with 2 decimals and pad it
+      const amountFormatted = parseFloat(amount).toFixed(2); //.replace('.', '');
+      const amountTag = `${amountFormatted.padStart(6, '0')}`;
+      const amountTagLength = String(amountTag.length).padStart(2, '0');
+      
+      // Concatenate data fields (without CRC)
+      let qrData = fix1 + billerId + fix2 + shopCode + fix3 + shopCode + fix4 + shopCode + fix5 + shopCode + fix6 + amountTagLength + amountTag + fix7;
+      // Calculate CRC (CCITT algorithm)
+      const crcValue = calculateCRC(qrData).toString(16).toUpperCase().padStart(4, '0'); //crc.crc16ccitt(qrData).toString(16).toUpperCase().padStart(4, '0');  
+
+      console.log(qrData + crcValue);
+      // Append CRC to the final data string
+      return qrData + crcValue;
+    }
+
+    // Function to generate PromptPay data with CRC
+    function generatePromptPayData(amount, _shopCode) {
+      const version = '000201';   // QR Code version
+      const type = '010211';      // Standard QR code
+      const countryCode = '53037645802TH';  // Country/Amount Tag prefix (5303764 -> THB)
+      
+      // Example static PromptPay payload (you'd typically use dynamic account details)
+      const promptPayTag = '29370016A0000006770101110'; 
+      let telNo = _shopCode; // '6681454085354';  
+      let promptpayTag1 = "";
+      if(telNo.length == 10) {
+        promptpayTag1 = "1130066";
+        telNo = telNo.substring(1,10);
+      } else {
+        promptpayTag1 = "213"
+      }
+      // Format the amount correctly with 2 decimals and pad it
+      const amountFormatted = parseFloat(amount).toFixed(2); //.replace('.', '');
+      const amountTag = `${amountFormatted.padStart(6, '0')}`;
+      const amountTagLength = String(amountTag.length).padStart(2, '0');
+
+      // Concatenate data fields (without CRC)
+      let qrData = version + type + countryCode + promptPayTag + promptpayTag1 + telNo + "54" + amountTagLength + amountTag + "6304";
+      console.log('qrData',qrData);
+      // Calculate CRC (CCITT algorithm)
+      const crcValue = calculateCRC(qrData).toString(16).toUpperCase().padStart(4, '0'); //crc.crc16ccitt(qrData).toString(16).toUpperCase().padStart(4, '0');  
+
+      console.log(qrData + crcValue);
+      // Append CRC to the final data string
+      return qrData + crcValue;
+    }
+    // Simple CRC calculation (CCITT algorithm)
+    function _calculateCRC(data) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < data.length; i++) {
+        crc ^= data.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+          crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+        }
+      }
+      return crc & 0xFFFF;
+    }
+    function calculateCRC(data) {
+      let crc = 0xFFFF;  // Initialize CRC with 0xFFFF
+      for (let i = 0; i < data.length; i++) {
+        crc ^= data.charCodeAt(i) << 8;  // XOR byte into the top of crc
+        for (let j = 0; j < 8; j++) {
+          if ((crc & 0x8000) !== 0) {
+            crc = (crc << 1) ^ 0x1021;  // Polynomial 0x1021
+          } else {
+            crc <<= 1;
+          }
+          crc &= 0xFFFF;  // Trim CRC to 16 bits
+        }
+      }
+      return crc & 0xFFFF;  // Ensure a 16-bit output
+    }
+
+  </script>
+</body>
+</html>

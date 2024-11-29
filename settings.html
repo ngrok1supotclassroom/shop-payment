@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      margin-top: 10px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: #555;
+    }
+
+    .back-button:hover {
+      color: #000;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    label {
+      margin: 0 5px;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <button class="back-button" onclick="goBack()">
+      <span class="material-icons" style="font-size: 36px;">home</span>
+    </button>
+    <h1>Settings</h1>
+    <form id="settingsForm">
+      <div class="radio-group">
+        <label><input type="radio" name="bank" value="SCB" required /> SCB</label>
+        <label><input type="radio" name="bank" value="KBANK" /> KBANK</label>
+        <label><input type="radio" name="bank" value="PromptPay" /> PromptPay</label>
+      </div>
+
+      <input type="text" id="shopCode" placeholder="Shop Code" required />
+      <input type="text" id="billerId" placeholder="Biller ID" required />
+      <input type="text" id="ref" placeholder="Reference" required />
+
+      <!-- Button Labels Grid -->
+      <h2>Set Button Labels</h2>
+      <!--<div class="button-grid" id="buttonGrid"></div>-->
+      <div id="buttonLabelContainer"></div>  <!-- Container for 12 button inputs -->
+      
+      <button type="submit">Save Settings</button>
+    </form>
+  </div>
+
+  <script>
+    const shopCodeInput = document.getElementById('shopCode');
+    const billerIdInput = document.getElementById('billerId');
+    const refInput = document.getElementById('ref');
+
+    // Create 12 input fields for button labels dynamically
+    function loadButtonLabels() {
+      const container = document.getElementById('buttonLabelContainer');
+      container.innerHTML = '';  // Clear any existing elements
+
+      // Retrieve button labels from localStorage or initialize with defaults
+      const buttonLabels = JSON.parse(localStorage.getItem('buttonLabels')) || Array.from({ length: 12 }, (_, i) => i + 1);
+
+      // Create 12 input fields
+      for (let i = 0; i < 12; i++) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.placeholder = `Button ${i + 1} Label`;
+        input.value = buttonLabels[i];  // Set input value
+        input.required = true;
+        input.style.marginBottom = '10px';
+        input.classList.add('button-label-input');  // Optional for styling
+        container.appendChild(input);
+      }
+    }
+
+    function loadBankData(bank) {
+      shopCodeInput.value = localStorage.getItem(`${bank}_shopCode`) || '';
+      billerIdInput.value = localStorage.getItem(`${bank}_billerId`) || '';
+      refInput.value = localStorage.getItem(`${bank}_ref`) || '';
+    }
+
+    document.querySelectorAll('input[name="bank"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        loadBankData(this.value);  // Load the data for the selected bank
+      });
+    });
+
+    window.onload = function() {
+      const savedBank = localStorage.getItem('bank') || 'SCB';  // Default to SCB
+      document.querySelector(`input[name="bank"][value="${savedBank}"]`).checked = true;
+      loadBankData(savedBank);
+      loadButtonLabels();
+    };
+
+    document.getElementById('settingsForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const selectedBank = document.querySelector('input[name="bank"]:checked').value;
+      localStorage.setItem('bank', selectedBank);
+      localStorage.setItem(`${selectedBank}_shopCode`, shopCodeInput.value);
+      localStorage.setItem(`${selectedBank}_billerId`, billerIdInput.value);
+      localStorage.setItem(`${selectedBank}_ref`, refInput.value);
+
+      const inputs = document.querySelectorAll('.button-label-input');
+      const buttonLabels = Array.from(inputs).map(input => parseInt(input.value) || 0);  // Get values from inputs
+
+      localStorage.setItem('buttonLabels', JSON.stringify(buttonLabels));  // Save to localStorage
+
+      alert('Settings saved!');
+      window.location.href = 'index.html';  // Redirect to index.html after saving
+    });
+
+    function goBack() {
+      window.location.href = 'index.html';  // Navigate back to index.html
+    }
+
+  </script>
+</body>
+</html>
