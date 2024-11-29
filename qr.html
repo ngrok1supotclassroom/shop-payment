@@ -82,7 +82,7 @@
       <span style="width: 24px;"></span> 
       <h1 id="bank">Bank</h1>
       <span style="width: 24px;"></span> 
-      <img id="bankImage" src="/images/scb.png" style="width: 75px;height: 75px;"/>
+      <img id="bankImage" src="images/scb.png" style="width: 75px;height: 75px;"/>
     </div>
     <div id="number" style="font-size: 64px; font-weight:900; color: red;">Amount</div>
     <div class="qr" id="qrcode"></div> <!-- QR Code will be displayed here -->
@@ -94,6 +94,7 @@
     //  e.preventDefault();
       const savedBank = localStorage.getItem('bank') || 'SCB';
       document.getElementById("bank").innerHTML = savedBank;
+      document.getElementById("bankImage").src = "images/" + savedBank.toLowerCase() + ".png";
       const number = localStorage.getItem('amount'); // document.getElementById('number').value;
       const shopCode = localStorage.getItem(`${savedBank}_shopCode`);
       const billerId = localStorage.getItem(`${savedBank}_billerId`);
