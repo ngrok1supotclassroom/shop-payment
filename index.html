@@ -314,34 +314,6 @@
   </div>
 
   <script>
-  function checkSessionExpiration() {
-    const sessionStart = sessionStorage.getItem('sessionStart');
-
-    if (!sessionStart) {
-      // If no session start time is found, treat it as expired
-      alert('Session expired or not logged in. Please log in again.');
-      window.location.href = 'login.html'; // Redirect to login
-      return;
-    }
-
-    const currentTime = Date.now();
-    const sessionDuration = currentTime - sessionStart; // Time difference in milliseconds
-    const oneDayInMillis = 10 * 1000; // 24 hours in milliseconds
-    console.log('oneDayInMillis', oneDayInMillis);
-    if (sessionDuration > oneDayInMillis) {
-      // If the session duration exceeds 24 hours
-      alert('Your session has expired. Please log in again.');
-      sessionStorage.removeItem('sessionStart'); // Clear session start time
-      window.location.href = '/login.html'; // Redirect to login
-    } else {
-      // Session is still valid, you can proceed with the session
-      console.log('Session is still valid');
-    }
-  }
-
-  // Call this function when the page loads
-  checkSessionExpiration();
-
     function isMobileDevice() {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
@@ -506,6 +478,29 @@
     };
 
     async function checkSessionExpiration() {
+      const sessionStart = sessionStorage.getItem('sessionStart');
+
+      if (!sessionStart) {
+        // If no session start time is found, treat it as expired
+        alert('Session expired or not logged in. Please log in again.');
+        window.location.href = 'login.html'; // Redirect to login
+        return;
+      }
+
+      const currentTime = Date.now();
+      const sessionDuration = currentTime - sessionStart; // Time difference in milliseconds
+      const oneDayInMillis = 10 * 1000; // 24 hours in milliseconds
+      console.log('oneDayInMillis', oneDayInMillis);
+      if (sessionDuration > oneDayInMillis) {
+        // If the session duration exceeds 24 hours
+        alert('Your session has expired. Please log in again.');
+        sessionStorage.removeItem('sessionStart'); // Clear session start time
+        window.location.href = '/login.html'; // Redirect to login
+      } else {
+        // Session is still valid, you can proceed with the session
+        console.log('Session is still valid');
+      }
+
       const username = sessionStorage.getItem('username');
       if(!username) {
         showModal('Session Expired','Session expired or not logged in. Please log in again.', redirectToLogin);
