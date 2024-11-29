@@ -327,7 +327,7 @@
     const currentTime = Date.now();
     const sessionDuration = currentTime - sessionStart; // Time difference in milliseconds
     const oneDayInMillis = 10 * 1000; // 24 hours in milliseconds
-
+    console.log('oneDayInMillis', oneDayInMillis);
     if (sessionDuration > oneDayInMillis) {
       // If the session duration exceeds 24 hours
       alert('Your session has expired. Please log in again.');
