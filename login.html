@@ -106,7 +106,7 @@
 
       try {
         // Fetch user data from user.json
-        const response = await fetch('user.json');
+        const response = await fetch('user.json', { cache: 'no-cache' });
         const users = await response.json();
 
         // Validate credentials

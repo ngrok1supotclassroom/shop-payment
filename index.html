@@ -512,7 +512,7 @@
 
       try {
         // Fetch user data from user.json
-        const response = await fetch('user.json'); // Adjust path if necessary
+        const response = await fetch('user.json', { cache: 'no-cache' }); // Adjust path if necessary
         const users = await response.json();
         console.log(users);
         // Find the current user in the user data
